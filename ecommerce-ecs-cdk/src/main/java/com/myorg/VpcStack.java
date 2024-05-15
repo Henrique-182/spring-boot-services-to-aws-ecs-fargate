@@ -14,7 +14,7 @@ public class VpcStack extends Stack {
 		super(scope, id, props);
 		
 		this.vpc = new Vpc(
-				scope, 
+				this, 
 				"Vpc",
 				VpcProps.builder()
 					.vpcName("ECommerceVPC")

@@ -29,6 +29,15 @@ public class EcommerceEcsCdkApp {
         			.tags(infraTags)
         			.build()
         	);
+        
+        VpcStack vpcStack = new VpcStack(
+        		app, 
+        		"Vpc",
+        		StackProps.builder()
+        			.env(environment)
+        			.tags(infraTags)
+        			.build()
+        	);
 
         app.synth();
     }
