@@ -50,6 +50,18 @@ public class EcommerceEcsCdkApp {
         	);
         
         clusterStack.addDependency(vpcStack);
+        
+        NetworkLoadBalancerStack networkLoadBalancerStack = new NetworkLoadBalancerStack(
+        		app, 
+        		"NetworkLoadBalancer", 
+        		StackProps.builder()
+					.env(environment)
+					.tags(infraTags)
+					.build(),
+        		new NetworkLoadBalancerStackProps(vpcStack.getVpc())
+        	);
+        
+        networkLoadBalancerStack.addDependency(vpcStack);
 
         app.synth();
     }
