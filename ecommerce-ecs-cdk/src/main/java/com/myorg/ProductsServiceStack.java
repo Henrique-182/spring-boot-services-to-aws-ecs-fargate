@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import software.amazon.awscdk.Duration;
 import software.amazon.awscdk.RemovalPolicy;
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
@@ -22,10 +23,12 @@ import software.amazon.awscdk.services.ecs.FargateTaskDefinition;
 import software.amazon.awscdk.services.ecs.FargateTaskDefinitionProps;
 import software.amazon.awscdk.services.ecs.PortMapping;
 import software.amazon.awscdk.services.ecs.Protocol;
+import software.amazon.awscdk.services.elasticloadbalancingv2.AddApplicationTargetsProps;
 import software.amazon.awscdk.services.elasticloadbalancingv2.ApplicationListener;
 import software.amazon.awscdk.services.elasticloadbalancingv2.ApplicationListenerProps;
 import software.amazon.awscdk.services.elasticloadbalancingv2.ApplicationLoadBalancer;
 import software.amazon.awscdk.services.elasticloadbalancingv2.ApplicationProtocol;
+import software.amazon.awscdk.services.elasticloadbalancingv2.HealthCheck;
 import software.amazon.awscdk.services.elasticloadbalancingv2.NetworkLoadBalancer;
 import software.amazon.awscdk.services.logs.LogGroup;
 import software.amazon.awscdk.services.logs.LogGroupProps;
@@ -111,6 +114,27 @@ public class ProductsServiceStack extends Stack {
 		productsServiceProps.repository().grantPull(fargateTaskDefinition.getExecutionRole());
 		
 		fargateService.getConnections().getSecurityGroups().get(0).addIngressRule(Peer.anyIpv4(), Port.tcp(8080));
+		
+		applicationListener.addTargets(
+				"ProductsServiceApplicationLoadBalancerTarget", 
+				AddApplicationTargetsProps.builder()
+					.targetGroupName("products-service-application-load-balancer")
+					.port(8080)
+					.protocol(ApplicationProtocol.HTTP)
+					.targets(Collections.singletonList(fargateService))
+					.deregistrationDelay(Duration.seconds(30))
+					.healthCheck(
+						HealthCheck.builder()
+							.enabled(true)
+							.interval(Duration.seconds(30))
+							.timeout(Duration.seconds(10))
+							.path("/actuator/health")
+							.healthyHttpCodes("200")
+							.port("8080")
+							.build()
+					)
+					.build()
+			);
 	}
 	
 }
