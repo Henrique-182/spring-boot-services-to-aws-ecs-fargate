@@ -25,6 +25,10 @@ public class ClusterStack extends Stack {
 					.build()
 			);
 	}
+
+	public Cluster getCluster() {
+		return cluster;
+	}
 	
 }
 
