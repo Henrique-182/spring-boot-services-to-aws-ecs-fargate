@@ -7,6 +7,8 @@ import java.util.Map;
 import software.amazon.awscdk.RemovalPolicy;
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
+import software.amazon.awscdk.services.ec2.Peer;
+import software.amazon.awscdk.services.ec2.Port;
 import software.amazon.awscdk.services.ec2.Vpc;
 import software.amazon.awscdk.services.ecr.Repository;
 import software.amazon.awscdk.services.ecs.AwsLogDriver;
@@ -14,6 +16,8 @@ import software.amazon.awscdk.services.ecs.AwsLogDriverProps;
 import software.amazon.awscdk.services.ecs.Cluster;
 import software.amazon.awscdk.services.ecs.ContainerDefinitionOptions;
 import software.amazon.awscdk.services.ecs.ContainerImage;
+import software.amazon.awscdk.services.ecs.FargateService;
+import software.amazon.awscdk.services.ecs.FargateServiceProps;
 import software.amazon.awscdk.services.ecs.FargateTaskDefinition;
 import software.amazon.awscdk.services.ecs.FargateTaskDefinitionProps;
 import software.amazon.awscdk.services.ecs.PortMapping;
@@ -91,6 +95,21 @@ public class ProductsServiceStack extends Stack {
 						.loadBalancer(productsServiceProps.applicationLoadBalancer())
 						.build()
 				);
+		
+		FargateService fargateService = new FargateService(
+				this, 
+				"ProductsService", 
+				FargateServiceProps.builder()
+					.serviceName("ProductsService")
+					.cluster(productsServiceProps.cluster())
+					.taskDefinition(fargateTaskDefinition)
+					.desiredCount(2)
+					.build()
+			);
+		
+		productsServiceProps.repository().grantPull(fargateTaskDefinition.getExecutionRole());
+		
+		fargateService.getConnections().getSecurityGroups().get(0).addIngressRule(Peer.anyIpv4(), Port.tcp(8080));
 	}
 	
 }
