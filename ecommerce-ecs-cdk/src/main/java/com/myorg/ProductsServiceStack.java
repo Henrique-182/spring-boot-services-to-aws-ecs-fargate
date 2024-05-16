@@ -21,14 +21,18 @@ import software.amazon.awscdk.services.ecs.FargateService;
 import software.amazon.awscdk.services.ecs.FargateServiceProps;
 import software.amazon.awscdk.services.ecs.FargateTaskDefinition;
 import software.amazon.awscdk.services.ecs.FargateTaskDefinitionProps;
+import software.amazon.awscdk.services.ecs.LoadBalancerTargetOptions;
 import software.amazon.awscdk.services.ecs.PortMapping;
 import software.amazon.awscdk.services.ecs.Protocol;
 import software.amazon.awscdk.services.elasticloadbalancingv2.AddApplicationTargetsProps;
+import software.amazon.awscdk.services.elasticloadbalancingv2.AddNetworkTargetsProps;
 import software.amazon.awscdk.services.elasticloadbalancingv2.ApplicationListener;
 import software.amazon.awscdk.services.elasticloadbalancingv2.ApplicationListenerProps;
 import software.amazon.awscdk.services.elasticloadbalancingv2.ApplicationLoadBalancer;
 import software.amazon.awscdk.services.elasticloadbalancingv2.ApplicationProtocol;
+import software.amazon.awscdk.services.elasticloadbalancingv2.BaseNetworkListenerProps;
 import software.amazon.awscdk.services.elasticloadbalancingv2.HealthCheck;
+import software.amazon.awscdk.services.elasticloadbalancingv2.NetworkListener;
 import software.amazon.awscdk.services.elasticloadbalancingv2.NetworkLoadBalancer;
 import software.amazon.awscdk.services.logs.LogGroup;
 import software.amazon.awscdk.services.logs.LogGroupProps;
@@ -132,6 +136,35 @@ public class ProductsServiceStack extends Stack {
 							.healthyHttpCodes("200")
 							.port("8080")
 							.build()
+					)
+					.build()
+			);
+		
+		NetworkListener networkListener = productsServiceProps.networkLoadBalancer()
+				.addListener(
+					"ProductsServiceNetworkLoadBalancerListener", 
+					BaseNetworkListenerProps.builder()
+						.port(8080)
+						.protocol(software.amazon.awscdk.services.elasticloadbalancingv2.Protocol.HTTP)
+						.build()
+				);
+		
+		networkListener.addTargets(
+				"ProductsServiceNetworkLoadBalancerTarget", 
+				AddNetworkTargetsProps.builder()
+					.port(8080)
+					.protocol(software.amazon.awscdk.services.elasticloadbalancingv2.Protocol.HTTP)
+					.targetGroupName("products-service-network-load-balancer")
+					.targets(
+						Collections.singletonList(
+							fargateService.loadBalancerTarget(
+								LoadBalancerTargetOptions.builder()
+									.containerName("products-service")
+									.protocol(Protocol.TCP)
+									.containerPort(8080)
+									.build()
+							)
+						)
 					)
 					.build()
 			);
