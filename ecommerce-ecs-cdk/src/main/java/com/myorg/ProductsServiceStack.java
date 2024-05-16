@@ -104,6 +104,7 @@ public class ProductsServiceStack extends Stack {
 					.cluster(productsServiceProps.cluster())
 					.taskDefinition(fargateTaskDefinition)
 					.desiredCount(2)
+					.assignPublicIp(true)
 					.build()
 			);
 		
