@@ -18,7 +18,10 @@ import software.amazon.awscdk.services.ecs.FargateTaskDefinition;
 import software.amazon.awscdk.services.ecs.FargateTaskDefinitionProps;
 import software.amazon.awscdk.services.ecs.PortMapping;
 import software.amazon.awscdk.services.ecs.Protocol;
+import software.amazon.awscdk.services.elasticloadbalancingv2.ApplicationListener;
+import software.amazon.awscdk.services.elasticloadbalancingv2.ApplicationListenerProps;
 import software.amazon.awscdk.services.elasticloadbalancingv2.ApplicationLoadBalancer;
+import software.amazon.awscdk.services.elasticloadbalancingv2.ApplicationProtocol;
 import software.amazon.awscdk.services.elasticloadbalancingv2.NetworkLoadBalancer;
 import software.amazon.awscdk.services.logs.LogGroup;
 import software.amazon.awscdk.services.logs.LogGroupProps;
@@ -78,6 +81,16 @@ public class ProductsServiceStack extends Stack {
 					.environment(envVariables)
 					.build()
 			);
+		
+		ApplicationListener applicationListener = productsServiceProps.applicationLoadBalancer()
+				.addListener(
+					"ProductsServiceApplicationLoadBalancerListener", 
+					ApplicationListenerProps.builder()
+						.port(8080)
+						.protocol(ApplicationProtocol.HTTP)
+						.loadBalancer(productsServiceProps.applicationLoadBalancer())
+						.build()
+				);
 	}
 	
 }
