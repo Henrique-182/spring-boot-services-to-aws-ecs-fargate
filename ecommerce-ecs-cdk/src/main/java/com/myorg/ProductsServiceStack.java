@@ -122,7 +122,7 @@ public class ProductsServiceStack extends Stack {
 		applicationListener.addTargets(
 				"ProductsServiceApplicationLoadBalancerTarget", 
 				AddApplicationTargetsProps.builder()
-					.targetGroupName("products-service-application-load-balancer")
+					.targetGroupName("prod-service-app-load-balancer")
 					.port(8080)
 					.protocol(ApplicationProtocol.HTTP)
 					.targets(Collections.singletonList(fargateService))
@@ -145,7 +145,7 @@ public class ProductsServiceStack extends Stack {
 					"ProductsServiceNetworkLoadBalancerListener", 
 					BaseNetworkListenerProps.builder()
 						.port(8080)
-						.protocol(software.amazon.awscdk.services.elasticloadbalancingv2.Protocol.HTTP)
+						.protocol(software.amazon.awscdk.services.elasticloadbalancingv2.Protocol.TCP)
 						.build()
 				);
 		
@@ -153,8 +153,8 @@ public class ProductsServiceStack extends Stack {
 				"ProductsServiceNetworkLoadBalancerTarget", 
 				AddNetworkTargetsProps.builder()
 					.port(8080)
-					.protocol(software.amazon.awscdk.services.elasticloadbalancingv2.Protocol.HTTP)
-					.targetGroupName("products-service-network-load-balancer")
+					.protocol(software.amazon.awscdk.services.elasticloadbalancingv2.Protocol.TCP)
+					.targetGroupName("prod-service-net-load-balancer")
 					.targets(
 						Collections.singletonList(
 							fargateService.loadBalancerTarget(
