@@ -87,6 +87,21 @@ public class EcommerceEcsCdkApp {
         productsServiceStack.addDependency(clusterStack);
         productsServiceStack.addDependency(networkLoadBalancerStack);
         productsServiceStack.addDependency(ecrStack);
+        
+        ApiStack apiStack = new ApiStack(
+        		app, 
+        		"Api", 
+        		StackProps.builder()
+    				.env(environment)
+    				.tags(infraTags)
+    				.build(), 
+        		new ApiStackProps(
+        				networkLoadBalancerStack.getNetworkLoadBalancer(), 
+        				networkLoadBalancerStack.getVpcLink()
+        			)
+        	);
+        
+        apiStack.addDependency(networkLoadBalancerStack);
 
         app.synth();
     }
