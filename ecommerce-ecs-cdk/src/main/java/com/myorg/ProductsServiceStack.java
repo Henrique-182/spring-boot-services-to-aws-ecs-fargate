@@ -8,6 +8,11 @@ import software.amazon.awscdk.Duration;
 import software.amazon.awscdk.RemovalPolicy;
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
+import software.amazon.awscdk.services.dynamodb.Attribute;
+import software.amazon.awscdk.services.dynamodb.AttributeType;
+import software.amazon.awscdk.services.dynamodb.BillingMode;
+import software.amazon.awscdk.services.dynamodb.Table;
+import software.amazon.awscdk.services.dynamodb.TableProps;
 import software.amazon.awscdk.services.ec2.Peer;
 import software.amazon.awscdk.services.ec2.Port;
 import software.amazon.awscdk.services.ec2.Vpc;
@@ -44,6 +49,24 @@ public class ProductsServiceStack extends Stack {
 	public ProductsServiceStack(final Construct scope, final String id, final StackProps props, ProductsServiceProps productsServiceProps) {
 		
 		super(scope, id, props);
+		
+		Table productsDbd = new Table(
+				this, 
+				"ProductsDbd", 
+				TableProps.builder()
+					.partitionKey(
+						Attribute.builder()
+							.name("id")
+							.type(AttributeType.STRING)
+							.build()
+					)
+					.tableName("products")
+					.removalPolicy(RemovalPolicy.DESTROY)
+					.billingMode(BillingMode.PROVISIONED)
+					.readCapacity(1)
+					.writeCapacity(1)
+					.build()
+			);
 		
 		FargateTaskDefinition fargateTaskDefinition = new FargateTaskDefinition(
 				this, 
