@@ -50,9 +50,9 @@ public class ProductsServiceStack extends Stack {
 		
 		super(scope, id, props);
 		
-		Table productsDbd = new Table(
+		Table productsDdb = new Table(
 				this, 
-				"ProductsDbd", 
+				"ProductsDdb", 
 				TableProps.builder()
 					.partitionKey(
 						Attribute.builder()
@@ -78,6 +78,8 @@ public class ProductsServiceStack extends Stack {
 					.build()
 			);
 		
+		productsDdb.grantReadWriteData(fargateTaskDefinition.getTaskRole());
+		
 		AwsLogDriver awsLogDriver = new AwsLogDriver(
 				AwsLogDriverProps.builder()
 					.logGroup(
@@ -97,6 +99,8 @@ public class ProductsServiceStack extends Stack {
 		
 		Map<String, String> envVariables = new HashMap<>();
 		envVariables.put("SERVER_PORT", "8080");
+		envVariables.put("AWS_PRODUCTSDDB_NAME", productsDdb.getTableName());
+		envVariables.put("AWS_REGION", this.getRegion());
 		
 		fargateTaskDefinition.addContainer(
 				"ProductsServiceContainer", 
